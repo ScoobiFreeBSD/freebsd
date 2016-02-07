@@ -1753,6 +1753,7 @@ product EDIMAX EW7822UAC	0xa822	EW-7822UAC
 /* eGalax Products */
 product EGALAX TPANEL		0x0001	Touch Panel
 product EGALAX TPANEL2		0x0002	Touch Panel
+product EGALAX TPANEL3          0xa119  eGalaxTouch EXC7910-1037
 product EGALAX2 TPANEL		0x0001	Touch Panel
 
 /* EGO Products */
