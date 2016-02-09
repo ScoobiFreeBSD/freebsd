@@ -126,6 +126,14 @@ set optionsmenu_keycode[6]=118
 set optionsansi_caption[6]="^[1mV^[merbose..... ^[34;1mOff^[m"
 set optionstoggled_ansi[6]="^[1mV^[merbose..... ^[32;7mOn^[m"
 
+set optionsmenu_init[7]="init_console"
+set optionsmenu_caption[7]="[C]onsole mode... off"
+set optionstoggled_text[7]="[C]onsole mode... On"
+set optionsmenu_command[7]="toggle_console"
+set optionsmenu_keycode[7]=99
+set optionsansi_caption[7]="[1mC[37monsole..... [34;1mOff[37m"
+set optionstoggled_ansi[7]="[1mC[37monsole..... [32;7mOn[0;37m"
+
 \ 
 \ BOOT ENVIRONMENT MENU
 \ 

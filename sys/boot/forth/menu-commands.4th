@@ -244,6 +244,45 @@ also menu-namespace also menu-command-helpers
 ;
 
 \ 
+\ Console Boot
+\ 
+
+: console_enabled? ( -- flag )
+	s" boot_console" getenv -1 <> dup if
+		swap drop ( c-addr flag -- flag )
+	then
+;
+
+: console_enable ( -- )
+	s" set boot_console=YES" evaluate
+;
+
+: console_disable ( -- )
+	s" boot_console" unsetenv
+;
+
+: init_console ( N -- N )
+	console_enabled? if
+		toggle_menuitem ( n -- n )
+	then
+;
+
+: toggle_console ( N -- N TRUE )
+	toggle_menuitem
+	menu-redraw
+
+	\ Now we're going to make the change effective
+
+	dup toggle_stateN @ 0= if
+		console_disable
+	else
+		console_enable
+	then
+
+	TRUE \ loop menu again
+;
+
+\ 
 \ Escape to Prompt
 \ 
 
