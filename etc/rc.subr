@@ -170,6 +170,28 @@ checkyesno()
 	esac
 }
 
+checkkenvyesno()
+{
+	_value=`/bin/kenv -q ${1}`
+	debug "checkyesno: $1 is set to $_value."
+	case $_value in
+
+		#	"yes", "true", "on", or "1"
+	[Yy][Ee][Ss]|[Tt][Rr][Uu][Ee]|[Oo][Nn]|1)
+		return 0
+		;;
+
+		#	"no", "false", "off", or "0"
+	[Nn][Oo]|[Ff][Aa][Ll][Ss][Ee]|[Oo][Ff][Ff]|0)
+		return 1
+		;;
+	*)
+		warn "\$${1} is not set properly - see rc.conf(5)."
+		return 1
+		;;
+	esac
+}
+
 #
 # reverse_list list
 #	print the list in reverse order
@@ -1290,7 +1312,7 @@ run_rc_script()
 	unset	name command command_args command_interpreter \
 		extra_commands pidfile procname \
 		rcvar rcvars rcvars_obsolete required_dirs required_files \
-		required_vars
+		required_vars required_kvars
 	eval unset ${_arg}_cmd ${_arg}_precmd ${_arg}_postcmd
 
 	case "$_file" in
@@ -1968,6 +1990,15 @@ check_required_before()
 		for _f in $required_vars; do
 			if ! checkyesno $_f; then
 				warn "\$${_f} is not enabled."
+				if [ -z "$rc_force" ]; then
+					return 1
+				fi
+			fi
+		done
+
+		for _f in $required_kvars; do
+			if ! checkkenvyesno $_f; then
+				warn "\$${_f} is not set in kernel environment."
 				if [ -z "$rc_force" ]; then
 					return 1
 				fi
