@@ -31,6 +31,7 @@
 __FBSDID("$FreeBSD$");
 
 #include "opt_isa.h"
+#include "opt_acpi.h"
 
 #include <sys/param.h>
 #include <sys/systm.h>
@@ -53,14 +54,32 @@ __FBSDID("$FreeBSD$");
 #include <machine/intr_machdep.h>
 #include "clock_if.h"
 
+#include <contrib/dev/acpica/include/acpi.h>
+#include <contrib/dev/acpica/include/accommon.h>
+#include <dev/acpica/acpivar.h>
+
 #define	RTC_LOCK	do { if (!kdb_active) mtx_lock_spin(&clock_lock); } while (0)
 #define	RTC_UNLOCK	do { if (!kdb_active) mtx_unlock_spin(&clock_lock); } while (0)
+
+#define IO_DELAY()	(void)inb(0x84)
+#define IO_RTC_ADDR	(IO_RTC + 0)
+#define IO_RTC_DATA	(IO_RTC + 1)
 
 int	atrtcclock_disable = 0;
 
 static	int	rtc_reg = -1;
 static	u_char	rtc_statusa = RTCSA_DIVIDER | RTCSA_NOPROF;
 static	u_char	rtc_statusb = RTCSB_24HR;
+
+#ifndef ATRTC_VERBOSE
+#define ATRTC_VERBOSE 1
+#endif
+
+static unsigned int atrtc_verbose = ATRTC_VERBOSE;
+SYSCTL_UINT(_debug, OID_AUTO, atrtc_verbose, CTLFLAG_RWTUN,
+	&atrtc_verbose, 0, "AT-RTC Debug Level (0-2)");
+#define ATRTC_DBG_PRINTF(level, format, ...) \
+	if (atrtc_verbose >= level) printf(format, ##__VA_ARGS__)
 
 /*
  * RTC support routines
@@ -73,10 +92,10 @@ rtcin(int reg)
 
 	RTC_LOCK;
 	if (rtc_reg != reg) {
-		inb(0x84);
+		IO_DELAY();
 		outb(IO_RTC, reg);
 		rtc_reg = reg;
-		inb(0x84);
+		IO_DELAY();
 	}
 	val = inb(IO_RTC + 1);
 	RTC_UNLOCK;
@@ -89,14 +108,34 @@ writertc(int reg, u_char val)
 
 	RTC_LOCK;
 	if (rtc_reg != reg) {
-		inb(0x84);
+		IO_DELAY();
 		outb(IO_RTC, reg);
 		rtc_reg = reg;
-		inb(0x84);
+		IO_DELAY();
 	}
 	outb(IO_RTC + 1, val);
-	inb(0x84);
+	IO_DELAY();
 	RTC_UNLOCK;
+}
+
+static void
+acpi_cmos_read(ACPI_PHYSICAL_ADDRESS address, UINT8 *buf, UINT32 buflen)
+{
+	UINT32 offset;
+
+	for (offset = 0; offset < buflen; ++offset) {
+		buf[offset] = rtcin(address + offset) & 0xff;
+	}
+}
+
+static void
+acpi_cmos_write(ACPI_PHYSICAL_ADDRESS address, const UINT8 *buf, UINT32 buflen)
+{
+	UINT32 offset;
+
+	for (offset = 0; offset < buflen; ++offset) {
+		writertc(address + offset, buf[offset]);
+	}
 }
 
 static __inline int
@@ -161,7 +200,70 @@ struct atrtc_softc {
 	struct resource *intr_res;
 	void *intr_handler;
 	struct eventtimer et;
+	ACPI_HANDLE acpi_handle;	/* Handle of the PNP0B00 node */
+	int acpi_handle_registered;	/* 0 = acpi_handle not registered */
 };
+
+static int
+acpi_check_rtc_access(int is_read, u_long addr, u_long len)
+{
+	int retval = 1;	/* Success */
+
+	if (is_read) {
+		/* Reading 0x0C will muck with interrupts */
+		if (addr + len - 1 >= 0x0C && addr <= 0x0c)
+			retval = 0;
+	} else {
+		/* Allow single-byte writes to alarm registers and
+		 * addr >= 0x30, else deny.
+		 */
+		if (!((len == 1 && (addr <= 5 && (addr & 1))) || addr >= 0x30))
+			retval = 0;
+	}
+	return retval;
+}
+
+static ACPI_STATUS
+acpi_rtc_cmos_handler(UINT32 func, ACPI_PHYSICAL_ADDRESS addr,
+    UINT32 bitwidth, UINT64 *value, void *context, void *region_context)
+{
+	struct atrtc_softc *sc;
+	UINT32 bytewidth = bitwidth >> 3;
+
+	sc = (struct atrtc_softc *)context;
+	if (!value || !sc) {
+		ATRTC_DBG_PRINTF(1, "NULL parameter.\n");
+		return AE_BAD_PARAMETER;
+	}
+	if (bitwidth == 0 || bitwidth > 32 || (bitwidth & 0x07) ||
+			addr + bytewidth - 1 > 63) {
+		ATRTC_DBG_PRINTF(1,
+			"Invalid bitwidth (%u) or addr (0x%08lx).\n",
+			bitwidth, addr);
+		return AE_BAD_PARAMETER;
+	}
+	if (!acpi_check_rtc_access(func == ACPI_READ, addr, bytewidth)) {
+		ATRTC_DBG_PRINTF(1, "Bad CMOS %s access at addr 0x%08lx.\n",
+			func == ACPI_READ ? "read" : "write", addr);
+		return AE_BAD_PARAMETER;
+	}
+
+	switch (func) {
+		case ACPI_READ:
+			acpi_cmos_read(addr, (UINT8 *)value, bytewidth);
+			break;
+		case ACPI_WRITE:
+			acpi_cmos_write(addr, (const UINT8 *)value, bytewidth);
+			break;
+		default:
+			ATRTC_DBG_PRINTF(1, "Invalid function: %d.\n", func);
+			return AE_BAD_PARAMETER;
+	}
+	ATRTC_DBG_PRINTF(1, "%-5s%02u addr=%04lx val=%08x\n",
+			func == ACPI_READ ? "READ" : "WRITE", bytewidth,
+			addr, *((UINT32 *)value));
+	return AE_OK;
+}
 
 static int
 rtc_start(struct eventtimer *et, sbintime_t first, sbintime_t period)
@@ -245,10 +347,19 @@ atrtc_attach(device_t dev)
 	int i;
 
 	sc = device_get_softc(dev);
+	sc->acpi_handle = acpi_get_handle(dev);
 	sc->port_res = bus_alloc_resource(dev, SYS_RES_IOPORT, &sc->port_rid,
 	    IO_RTC, IO_RTC + 1, 2, RF_ACTIVE);
 	if (sc->port_res == NULL)
 		device_printf(dev, "Warning: Couldn't map I/O.\n");
+	if (ACPI_FAILURE(AcpiInstallAddressSpaceHandler(sc->acpi_handle,
+					ACPI_ADR_SPACE_CMOS,
+					acpi_rtc_cmos_handler, NULL, sc)))
+	{
+		device_printf(dev, "Warning: Couldn't register ACPI CMOS address space handler.\n");
+		/* I assume the softc was memset() to 0? */
+	} else
+		sc->acpi_handle_registered = 1;
 	atrtc_start();
 	clock_register(dev, 1000000);
 	bzero(&sc->et, sizeof(struct eventtimer));
@@ -284,6 +395,17 @@ atrtc_attach(device_t dev)
 		et_register(&sc->et);
 	}
 	return(0);
+}
+
+static int atrtc_detach(device_t dev)
+{
+	struct atrtc_softc *sc;
+
+	sc = device_get_softc(dev);
+	if (sc->acpi_handle_registered)
+		AcpiRemoveAddressSpaceHandler(sc->acpi_handle,
+				ACPI_ADR_SPACE_CMOS, acpi_rtc_cmos_handler);
+	return bus_generic_detach(dev);
 }
 
 static int
@@ -366,7 +488,7 @@ static device_method_t atrtc_methods[] = {
 	/* Device interface */
 	DEVMETHOD(device_probe,		atrtc_probe),
 	DEVMETHOD(device_attach,	atrtc_attach),
-	DEVMETHOD(device_detach,	bus_generic_detach),
+	DEVMETHOD(device_detach,	atrtc_detach),
 	DEVMETHOD(device_shutdown,	bus_generic_shutdown),
 	DEVMETHOD(device_suspend,	bus_generic_suspend),
 		/* XXX stop statclock? */
