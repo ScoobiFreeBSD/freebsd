@@ -120,9 +120,6 @@ extern int radeon_lockup_timeout;
 #define RADEONFB_CONN_LIMIT			4
 #define RADEON_BIOS_NUM_SCRATCH			8
 
-/* max number of rings */
-#define RADEON_NUM_RINGS			5
-
 /* fence seq are set to this number when signaled */
 #define RADEON_FENCE_SIGNALED_SEQ		0LL
 
@@ -138,6 +135,16 @@ extern int radeon_lockup_timeout;
 #define R600_RING_TYPE_DMA_INDEX		3
 /* cayman add a second async dma ring */
 #define CAYMAN_RING_TYPE_DMA1_INDEX		4
+
+/* R600+ */
+#define R600_RING_TYPE_UVD_INDEX		5
+
+/* TN+ */
+#define TN_RING_TYPE_VCE1_INDEX			6
+#define TN_RING_TYPE_VCE2_INDEX			7
+
+/* max number of rings */
+#define RADEON_NUM_RINGS			8
 
 /* hardcode those limit for now */
 #define RADEON_VA_IB_OFFSET			(1 << 20)
@@ -1637,6 +1644,7 @@ struct radeon_device {
 	struct task audio_work;
 	int num_crtc; /* number of crtcs */
 	struct sx dc_hw_i2c_mutex; /* display controller hw i2c mutex */
+	bool has_uvd;
 	bool audio_enabled;
 	struct r600_audio audio_status; /* audio stuff */
 #if defined(CONFIG_ACPI)

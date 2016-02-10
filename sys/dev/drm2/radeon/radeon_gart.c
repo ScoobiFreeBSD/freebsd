@@ -794,27 +794,28 @@ struct radeon_bo_va *radeon_vm_bo_add(struct radeon_device *rdev,
 				      struct radeon_vm *vm,
 				      struct radeon_bo *bo)
 {
-	struct radeon_bo_va *bo_va;
+	struct radeon_bo_va *bo_va = NULL;
 
-	bo_va = malloc(sizeof(struct radeon_bo_va),
-	    DRM_MEM_DRIVER, M_NOWAIT | M_ZERO);
-	if (bo_va == NULL) {
-		return NULL;
+	if (rdev && vm && bo) {
+		bo_va = malloc(sizeof(struct radeon_bo_va),
+		    DRM_MEM_DRIVER, M_NOWAIT | M_ZERO);
+		if (bo_va) {
+			bo_va->vm = vm;
+			bo_va->bo = bo;
+			bo_va->soffset = 0;
+			bo_va->eoffset = 0;
+			bo_va->flags = 0;
+			bo_va->valid = false;
+			bo_va->ref_count = 1;
+			INIT_LIST_HEAD(&bo_va->bo_list);
+			INIT_LIST_HEAD(&bo_va->vm_list);
+
+			sx_xlock(&vm->mutex);
+			list_add(&bo_va->vm_list, &vm->va);
+			list_add_tail(&bo_va->bo_list, &bo->va);
+			sx_xunlock(&vm->mutex);
+		}
 	}
-	bo_va->vm = vm;
-	bo_va->bo = bo;
-	bo_va->soffset = 0;
-	bo_va->eoffset = 0;
-	bo_va->flags = 0;
-	bo_va->valid = false;
-	bo_va->ref_count = 1;
-	INIT_LIST_HEAD(&bo_va->bo_list);
-	INIT_LIST_HEAD(&bo_va->vm_list);
-
-	sx_xlock(&vm->mutex);
-	list_add(&bo_va->vm_list, &vm->va);
-	list_add_tail(&bo_va->bo_list, &bo->va);
-	sx_xunlock(&vm->mutex);
 
 	return bo_va;
 }
