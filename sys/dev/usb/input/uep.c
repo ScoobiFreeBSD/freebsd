@@ -54,13 +54,13 @@
 #define USB_DEBUG_VAR uep_debug
 #include <dev/usb/usb_debug.h>
 
-#ifdef USB_DEBUG
+/*#ifdef USB_DEBUG */
 static int uep_debug = 0;
 
 static SYSCTL_NODE(_hw_usb, OID_AUTO, uep, CTLFLAG_RW, 0, "USB uep");
 SYSCTL_INT(_hw_usb_uep, OID_AUTO, debug, CTLFLAG_RWTUN,
     &uep_debug, 0, "Debug level");
-#endif
+/*#endif*/
 
 #define UEP_MAX_X		2047
 #define UEP_MAX_Y		2047

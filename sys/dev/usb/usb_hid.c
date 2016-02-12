@@ -352,10 +352,10 @@ hid_get_item(struct hid_data *s, struct hid_item *h)
 
 				if (c->flags & HIO_VARIABLE) {
 					/* range check usage count */
-					if (c->loc.count > 255) {
+					if (c->loc.count > 256) {
 						DPRINTFN(0, "Number of "
-						    "items truncated to 255\n");
-						s->ncount = 255;
+						    "items (%d) truncated to 256\n", c->loc.count);
+						s->ncount = 256;
 					} else
 						s->ncount = c->loc.count;
 
