@@ -866,17 +866,22 @@ static void
 pn_identify(driver_t *driver, device_t parent)
 {
 
-	if ((amd_pminfo & AMDPM_FID) == 0 || (amd_pminfo & AMDPM_VID) == 0)
+	if ((amd_pminfo & AMDPM_FID) == 0 || (amd_pminfo & AMDPM_VID) == 0) {
+		printf("powernow: pn_identify: amd_pminfo=0x%04x .\n", amd_pminfo);
 		return;
+	}
 	switch (cpu_id & 0xf00) {
 	case 0x600:
 	case 0xf00:
 		break;
 	default:
+		printf("powernow: pn_identify: cpu_id=0x%04x.\n", cpu_id);
 		return;
 	}
-	if (device_find_child(parent, "powernow", -1) != NULL)
+	if (device_find_child(parent, "powernow", -1) != NULL) {
+		printf("powernow: pn_identify: No \"powernow\"device found.\n");
 		return;
+	}
 	if (BUS_ADD_CHILD(parent, 10, "powernow", -1) == NULL)
 		device_printf(parent, "powernow: add child failed\n");
 }
@@ -895,8 +900,10 @@ pn_probe(device_t dev)
 	status = rdmsr(MSR_AMDK7_FIDVID_STATUS);
 
 	pc = cpu_get_pcpu(dev);
-	if (pc == NULL)
+	if (pc == NULL) {
+		printf("powernow: cpu_get_pcpu() returned NULL.\n");
 		return (ENODEV);
+	}
 
 	cpu_est_clockrate(pc->pc_cpuid, &rate);
 
@@ -936,6 +943,7 @@ pn_probe(device_t dev)
 			device_set_desc(dev, "Cool`n'Quiet K8");
 		break;
 	default:
+		printf("powernow: cpuid 0x%04x & 0xf00 not matched.\n", cpu_id);
 		return (ENODEV);
 	}
 
