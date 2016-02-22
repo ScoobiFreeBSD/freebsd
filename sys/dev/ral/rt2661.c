@@ -169,6 +169,7 @@ static int		rt2661_prepare_beacon(struct rt2661_softc *,
 static void		rt2661_enable_tsf_sync(struct rt2661_softc *);
 static void		rt2661_enable_tsf(struct rt2661_softc *);
 static int		rt2661_get_rssi(struct rt2661_softc *, uint8_t);
+static int		rt2661_enable_wlan_rt3290(struct rt2661_softc *);
 
 static const struct {
 	uint32_t	reg;
@@ -2448,6 +2449,7 @@ rt2661_load_microcode(struct rt2661_softc *sc)
 	case 0x0301: imagename = "rt2561sfw"; break;
 	case 0x0302: imagename = "rt2561fw"; break;
 	case 0x0401: imagename = "rt2661fw"; break;
+	case 0x3290: imagename = "rt3290fw"; break;
 	default:
 		device_printf(sc->sc_dev, "%s: unexpected pci device id 0x%x, "
 		    "don't know how to retrieve firmware\n",
@@ -2462,6 +2464,12 @@ rt2661_load_microcode(struct rt2661_softc *sc)
 		    "%s: unable to retrieve firmware image %s\n",
 		    __func__, imagename);
 		return EINVAL;
+	}
+
+	if (sc->sc_id == 0x3290) {
+		if (rt2661_enable_wlan_rt3290(sc)) {
+			return EBUSY;
+		}
 	}
 
 	/*
@@ -2736,6 +2744,69 @@ rt2661_get_rssi(struct rt2661_softc *sc, uint8_t raw)
 			rssi -= 100;
 	}
 	return rssi;
+}
+
+static int
+rt2661_enable_wlan_rt3290(struct rt2661_softc *rsc __attribute__((unused)))
+{
+#if 0
+	uint32_t reg;
+	int i, count;
+
+	reg = RAL_READ(sc, WLAN_FUN_CTRL);
+	rt2800_register_read(rt2x00dev, WLAN_FUN_CTRL, &reg);
+	if (!rt2x00_get_field32(reg, WLAN_EN)) {
+		rt2x00_set_field32(&reg, WLAN_GPIO_OUT_OE_BIT_ALL, 0xff);
+		rt2x00_set_field32(&reg, FRC_WL_ANT_SET, 1);
+		rt2x00_set_field32(&reg, WLAN_CLK_EN, 0);
+		rt2x00_set_field32(&reg, WLAN_EN, 1);
+		rt2800_register_write(rt2x00dev, WLAN_FUN_CTRL, reg);
+
+		udelay(REGISTER_BUSY_DELAY);
+
+		count = 0;
+		do {
+			/*
+			 * Check PLL_LD & XTAL_RDY.
+			 */
+			for (i = 0; i < REGISTER_BUSY_COUNT; i++) {
+				rt2800_register_read(rt2x00dev, CMB_CTRL, &reg);
+				if (rt2x00_get_field32(reg, PLL_LD) &&
+				    rt2x00_get_field32(reg, XTAL_RDY))
+					break;
+				udelay(REGISTER_BUSY_DELAY);
+			}
+
+			if (i >= REGISTER_BUSY_COUNT) {
+
+				if (count >= 10)
+					return -EIO;
+
+				rt2800_register_write(rt2x00dev, 0x58, 0x018);
+				udelay(REGISTER_BUSY_DELAY);
+				rt2800_register_write(rt2x00dev, 0x58, 0x418);
+				udelay(REGISTER_BUSY_DELAY);
+				rt2800_register_write(rt2x00dev, 0x58, 0x618);
+				udelay(REGISTER_BUSY_DELAY);
+				count++;
+			} else {
+				count = 0;
+			}
+
+			rt2800_register_read(rt2x00dev, WLAN_FUN_CTRL, &reg);
+			rt2x00_set_field32(&reg, PCIE_APP0_CLK_REQ, 0);
+			rt2x00_set_field32(&reg, WLAN_CLK_EN, 1);
+			rt2x00_set_field32(&reg, WLAN_RESET, 1);
+			rt2800_register_write(rt2x00dev, WLAN_FUN_CTRL, reg);
+			udelay(10);
+			rt2x00_set_field32(&reg, WLAN_RESET, 0);
+			rt2800_register_write(rt2x00dev, WLAN_FUN_CTRL, reg);
+			udelay(10);
+			rt2800_register_write(rt2x00dev, INT_SOURCE_CSR, 0x7fffffff);
+		} while (count != 0);
+	}
+#endif
+	return 0;
 }
 
 static void
