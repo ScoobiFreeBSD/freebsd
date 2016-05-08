@@ -60,7 +60,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/kernel.h>
+#endif
+
 #include "iwl-trans.h"
 
 struct iwl_trans *iwl_trans_alloc(unsigned int priv_size,

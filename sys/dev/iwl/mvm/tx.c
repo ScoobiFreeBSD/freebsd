@@ -62,8 +62,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/ieee80211.h>
 #include <linux/etherdevice.h>
+#endif
 
 #include "iwl-trans.h"
 #include "iwl-eeprom-parse.h"

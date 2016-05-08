@@ -27,10 +27,13 @@
  *****************************************************************************/
 
 
+#ifdef __linux__
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <net/mac80211.h>
+#endif
+
 #include "iwl-io.h"
 #include "iwl-modparams.h"
 #include "iwl-debug.h"

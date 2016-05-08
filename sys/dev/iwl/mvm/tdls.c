@@ -61,7 +61,10 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/etherdevice.h>
+#endif
+
 #include "mvm.h"
 #include "time-event.h"
 #include "iwl-io.h"

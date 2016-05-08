@@ -25,7 +25,10 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/etherdevice.h>
+#endif
+
 #include "iwl-trans.h"
 #include "iwl-modparams.h"
 #include "dev.h"

@@ -61,9 +61,11 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/export.h>
+#endif
 
 #include "iwl-drv.h"
 #include "iwl-phy-db.h"

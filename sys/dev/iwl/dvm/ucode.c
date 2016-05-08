@@ -28,7 +28,9 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/kernel.h>
+#endif
 
 #include "iwl-io.h"
 #include "iwl-agn-hw.h"

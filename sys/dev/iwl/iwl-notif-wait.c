@@ -61,8 +61,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/sched.h>
 #include <linux/export.h>
+#endif
 
 #include "iwl-drv.h"
 #include "iwl-notif-wait.h"

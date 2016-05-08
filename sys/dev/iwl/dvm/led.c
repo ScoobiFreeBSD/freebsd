@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 
+#ifdef __linux__
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/delay.h>
@@ -33,6 +34,8 @@
 #include <net/mac80211.h>
 #include <linux/etherdevice.h>
 #include <asm/unaligned.h>
+#endif
+
 #include "iwl-io.h"
 #include "iwl-trans.h"
 #include "iwl-modparams.h"

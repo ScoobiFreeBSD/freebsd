@@ -62,10 +62,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/firmware.h>
 #include <linux/rtnetlink.h>
 #include <linux/pci.h>
 #include <linux/acpi.h>
+#endif
+
 #include "iwl-trans.h"
 #include "iwl-csr.h"
 #include "mvm.h"

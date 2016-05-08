@@ -67,8 +67,10 @@
 #ifndef __iwl_op_mode_h__
 #define __iwl_op_mode_h__
 
+#ifdef __linux__
 #include <linux/netdevice.h>
 #include <linux/debugfs.h>
+#endif
 
 struct iwl_op_mode;
 struct iwl_trans;

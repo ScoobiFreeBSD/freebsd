@@ -24,7 +24,9 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/module.h>
+#endif
 
 /* sparse doesn't like tracepoint macros */
 #ifndef __CHECKER__

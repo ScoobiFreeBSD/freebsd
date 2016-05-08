@@ -29,6 +29,11 @@
 #ifndef __iwl_debug_h__
 #define __iwl_debug_h__
 
+#ifdef __FreeBSD__
+#include <sys/types.h>
+#include "linux-compat.h"
+#endif
+
 #include "iwl-modparams.h"
 
 

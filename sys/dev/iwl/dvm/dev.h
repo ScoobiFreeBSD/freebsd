@@ -31,12 +31,14 @@
 #ifndef __iwl_dev_h__
 #define __iwl_dev_h__
 
+#ifdef __linux__
 #include <linux/interrupt.h>
 #include <linux/kernel.h>
 #include <linux/wait.h>
 #include <linux/leds.h>
 #include <linux/slab.h>
 #include <linux/mutex.h>
+#endif
 
 #include "iwl-fw.h"
 #include "iwl-eeprom-parse.h"

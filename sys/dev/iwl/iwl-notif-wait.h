@@ -63,7 +63,9 @@
 #ifndef __iwl_notif_wait_h__
 #define __iwl_notif_wait_h__
 
+#ifdef __linux__
 #include <linux/wait.h>
+#endif
 
 #include "iwl-trans.h"
 

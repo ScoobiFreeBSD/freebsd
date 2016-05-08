@@ -28,7 +28,9 @@
 #ifndef __rs_h__
 #define __rs_h__
 
+#ifdef __linux__
 #include <net/mac80211.h>
+#endif
 
 #include "iwl-config.h"
 

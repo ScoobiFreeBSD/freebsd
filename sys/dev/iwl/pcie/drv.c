@@ -65,10 +65,12 @@
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
+#ifdef __linux__
 #include <linux/module.h>
 #include <linux/pci.h>
 #include <linux/pci-aspm.h>
 #include <linux/acpi.h>
+#endif
 
 #include "iwl-trans.h"
 #include "iwl-drv.h"

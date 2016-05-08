@@ -63,9 +63,11 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/ieee80211.h>
 #include <linux/etherdevice.h>
 #include <net/mac80211.h>
+#endif
 
 #include "fw-api-coex.h"
 #include "iwl-modparams.h"

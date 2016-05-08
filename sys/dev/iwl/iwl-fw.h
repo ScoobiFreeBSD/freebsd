@@ -64,8 +64,10 @@
 
 #ifndef __iwl_fw_h__
 #define __iwl_fw_h__
+#ifdef __linux__
 #include <linux/types.h>
 #include <net/mac80211.h>
+#endif
 
 #include "iwl-fw-file.h"
 #include "iwl-fw-error-dump.h"

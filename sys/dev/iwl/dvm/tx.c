@@ -27,10 +27,13 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/sched.h>
 #include <linux/ieee80211.h>
+#endif
+
 #include "iwl-io.h"
 #include "iwl-trans.h"
 #include "iwl-agn-hw.h"

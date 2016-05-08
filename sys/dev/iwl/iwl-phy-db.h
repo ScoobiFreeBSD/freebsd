@@ -64,7 +64,9 @@
 #ifndef __IWL_PHYDB_H__
 #define __IWL_PHYDB_H__
 
+#ifdef __linux__
 #include <linux/types.h>
+#endif
 
 #include "iwl-op-mode.h"
 #include "iwl-trans.h"

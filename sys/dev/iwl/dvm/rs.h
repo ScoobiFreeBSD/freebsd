@@ -27,7 +27,9 @@
 #ifndef __iwl_agn_rs_h__
 #define __iwl_agn_rs_h__
 
+#ifdef __linux__
 #include <net/mac80211.h>
+#endif
 
 #include "iwl-config.h"
 

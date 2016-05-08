@@ -63,7 +63,10 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <net/mac80211.h>
+#endif
+
 #include "fw-api.h"
 #include "mvm.h"
 

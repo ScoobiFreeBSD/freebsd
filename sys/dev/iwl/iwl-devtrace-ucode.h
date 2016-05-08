@@ -27,7 +27,9 @@
 #if !defined(__IWLWIFI_DEVICE_TRACE_UCODE) || defined(TRACE_HEADER_MULTI_READ)
 #define __IWLWIFI_DEVICE_TRACE_UCODE
 
+#ifdef __linux__
 #include <linux/tracepoint.h>
+#endif
 
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM iwlwifi_ucode
