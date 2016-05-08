@@ -62,7 +62,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/vmalloc.h>
+#endif
 
 #include "mvm.h"
 #include "sta.h"

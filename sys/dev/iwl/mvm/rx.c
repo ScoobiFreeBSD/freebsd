@@ -61,7 +61,10 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/skbuff.h>
+#endif
+
 #include "iwl-trans.h"
 #include "mvm.h"
 #include "fw-api.h"

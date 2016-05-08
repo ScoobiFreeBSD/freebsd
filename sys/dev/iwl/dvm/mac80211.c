@@ -26,6 +26,7 @@
  * Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -41,6 +42,7 @@
 #include <net/mac80211.h>
 
 #include <asm/div64.h>
+#endif
 
 #include "iwl-io.h"
 #include "iwl-trans.h"

@@ -27,7 +27,9 @@
 #if !defined(__IWLWIFI_DEVICE_TRACE_DATA) || defined(TRACE_HEADER_MULTI_READ)
 #define __IWLWIFI_DEVICE_TRACE_DATA
 
+#ifdef __linux__
 #include <linux/tracepoint.h>
+#endif
 
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM iwlwifi_data
@@ -77,4 +79,6 @@ TRACE_EVENT(iwlwifi_dev_rx_data,
 #define TRACE_INCLUDE_PATH .
 #undef TRACE_INCLUDE_FILE
 #define TRACE_INCLUDE_FILE iwl-devtrace-data
+#ifdef __linux__
 #include <trace/define_trace.h>
+#endif

@@ -65,7 +65,9 @@
 #ifndef __MVM_CONSTANTS_H
 #define __MVM_CONSTANTS_H
 
+#ifdef __linux__
 #include <linux/ieee80211.h>
+#endif
 
 #define IWL_MVM_DEFAULT_PS_TX_DATA_TIMEOUT	(100 * USEC_PER_MSEC)
 #define IWL_MVM_DEFAULT_PS_RX_DATA_TIMEOUT	(100 * USEC_PER_MSEC)

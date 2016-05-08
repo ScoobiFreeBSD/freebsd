@@ -62,8 +62,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <net/ipv6.h>
 #include <net/addrconf.h>
+#endif
+
 #include "mvm.h"
 
 void iwl_mvm_set_wowlan_qos_seq(struct iwl_mvm_sta *mvm_ap_sta,

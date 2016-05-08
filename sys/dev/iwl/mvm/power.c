@@ -65,12 +65,14 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/etherdevice.h>
 
 #include <net/mac80211.h>
+#endif
 
 #include "iwl-debug.h"
 #include "mvm.h"

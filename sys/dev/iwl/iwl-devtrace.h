@@ -25,9 +25,12 @@
  *****************************************************************************/
 
 #ifndef __IWLWIFI_DEVICE_TRACE
+#ifdef __linux__
 #include <linux/skbuff.h>
 #include <linux/ieee80211.h>
 #include <net/cfg80211.h>
+#endif
+
 #include "iwl-trans.h"
 #if !defined(__IWLWIFI_DEVICE_TRACE)
 static inline bool iwl_trace_data(struct sk_buff *skb)

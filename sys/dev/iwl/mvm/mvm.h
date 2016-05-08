@@ -66,10 +66,12 @@
 #ifndef __IWL_MVM_H__
 #define __IWL_MVM_H__
 
+#ifdef __linux__
 #include <linux/list.h>
 #include <linux/spinlock.h>
 #include <linux/leds.h>
 #include <linux/in6.h>
+#endif
 
 #include "iwl-op-mode.h"
 #include "iwl-trans.h"

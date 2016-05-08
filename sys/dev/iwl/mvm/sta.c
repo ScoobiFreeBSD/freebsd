@@ -62,7 +62,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <net/mac80211.h>
+#endif
 
 #include "mvm.h"
 #include "sta.h"

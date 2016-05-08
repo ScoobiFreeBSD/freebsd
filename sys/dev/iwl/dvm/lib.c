@@ -26,11 +26,13 @@
  * Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/etherdevice.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/sched.h>
 #include <net/mac80211.h>
+#endif
 
 #include "iwl-io.h"
 #include "iwl-agn-hw.h"

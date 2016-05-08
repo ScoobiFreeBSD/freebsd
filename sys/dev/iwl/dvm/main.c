@@ -29,6 +29,7 @@
 
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
+#ifdef __linux__
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -43,6 +44,7 @@
 #include <net/mac80211.h>
 
 #include <asm/div64.h>
+#endif
 
 #include "iwl-eeprom-read.h"
 #include "iwl-eeprom-parse.h"

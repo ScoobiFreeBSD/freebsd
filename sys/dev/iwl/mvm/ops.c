@@ -62,9 +62,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/module.h>
 #include <linux/vmalloc.h>
 #include <net/mac80211.h>
+#endif
 
 #include "iwl-notif-wait.h"
 #include "iwl-trans.h"

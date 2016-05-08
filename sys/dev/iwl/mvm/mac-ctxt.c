@@ -65,8 +65,11 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/etherdevice.h>
 #include <net/mac80211.h>
+#endif
+
 #include "iwl-io.h"
 #include "iwl-prph.h"
 #include "fw-api.h"

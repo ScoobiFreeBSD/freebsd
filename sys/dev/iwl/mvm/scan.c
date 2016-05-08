@@ -63,8 +63,10 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/etherdevice.h>
 #include <net/mac80211.h>
+#endif
 
 #include "mvm.h"
 #include "fw-api-scan.h"

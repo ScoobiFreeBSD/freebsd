@@ -61,7 +61,10 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/leds.h>
+#endif
+
 #include "iwl-io.h"
 #include "iwl-csr.h"
 #include "mvm.h"

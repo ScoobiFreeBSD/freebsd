@@ -63,10 +63,16 @@
 #ifndef __iwl_modparams_h__
 #define __iwl_modparams_h__
 
+#ifdef __linux__
 #include <linux/types.h>
 #include <linux/spinlock.h>
 #include <linux/gfp.h>
 #include <net/mac80211.h>
+#endif
+
+#ifdef __FreeBSD__
+#include "linux-compat.h"
+#endif
 
 extern struct iwl_mod_params iwlwifi_mod_params;
 

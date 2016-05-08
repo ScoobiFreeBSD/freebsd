@@ -24,6 +24,7 @@
  * Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/kernel.h>
 #include <linux/skbuff.h>
 #include <linux/slab.h>
@@ -34,6 +35,8 @@
 #include <linux/delay.h>
 
 #include <linux/workqueue.h>
+#endif
+
 #include "rs.h"
 #include "fw-api.h"
 #include "sta.h"

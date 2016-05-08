@@ -27,9 +27,11 @@
  * Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/sched.h>
 #include <linux/wait.h>
 #include <linux/gfp.h>
+#endif
 
 #include "iwl-prph.h"
 #include "iwl-io.h"

@@ -62,6 +62,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/pci.h>
 #include <linux/pci-aspm.h>
 #include <linux/interrupt.h>
@@ -70,6 +71,7 @@
 #include <linux/bitops.h>
 #include <linux/gfp.h>
 #include <linux/vmalloc.h>
+#endif
 
 #include "iwl-drv.h"
 #include "iwl-trans.h"

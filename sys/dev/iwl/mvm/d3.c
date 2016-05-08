@@ -63,6 +63,7 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/etherdevice.h>
 #include <linux/ip.h>
 #include <linux/fs.h>
@@ -70,6 +71,8 @@
 #include <net/ipv6.h>
 #include <net/tcp.h>
 #include <net/addrconf.h>
+#endif
+
 #include "iwl-modparams.h"
 #include "fw-api.h"
 #include "mvm.h"

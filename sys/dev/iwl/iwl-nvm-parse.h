@@ -62,7 +62,10 @@
 #ifndef __iwl_nvm_parse_h__
 #define __iwl_nvm_parse_h__
 
+#ifdef __linux__
 #include <net/cfg80211.h>
+#endif
+
 #include "iwl-eeprom-parse.h"
 
 /**

@@ -25,10 +25,12 @@
  *  Intel Linux Wireless <ilw@linux.intel.com>
  * Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
  *****************************************************************************/
+#ifdef __linux__
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/etherdevice.h>
 #include <net/mac80211.h>
+#endif
 
 #include "dev.h"
 #include "agn.h"

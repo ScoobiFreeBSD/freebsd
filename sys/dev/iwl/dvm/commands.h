@@ -69,8 +69,10 @@
 #ifndef __iwl_commands_h__
 #define __iwl_commands_h__
 
+#ifdef __linux__
 #include <linux/ieee80211.h>
 #include <linux/types.h>
+#endif
 
 
 enum {

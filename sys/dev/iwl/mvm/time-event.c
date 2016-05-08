@@ -63,8 +63,10 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/jiffies.h>
 #include <net/mac80211.h>
+#endif
 
 #include "iwl-notif-wait.h"
 #include "iwl-trans.h"

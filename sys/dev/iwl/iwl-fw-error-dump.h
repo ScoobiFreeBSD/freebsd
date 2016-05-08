@@ -65,7 +65,9 @@
 #ifndef __fw_error_dump_h__
 #define __fw_error_dump_h__
 
+#ifdef __linux__
 #include <linux/types.h>
+#endif
 
 #define IWL_FW_ERROR_DUMP_BARKER	0x14789632
 

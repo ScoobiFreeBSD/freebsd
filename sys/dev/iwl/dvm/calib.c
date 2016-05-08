@@ -60,8 +60,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/slab.h>
 #include <net/mac80211.h>
+#endif
 
 #include "iwl-trans.h"
 

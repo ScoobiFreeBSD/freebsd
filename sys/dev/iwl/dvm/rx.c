@@ -27,11 +27,14 @@
  *
  *****************************************************************************/
 
+#ifdef __linux__
 #include <linux/etherdevice.h>
 #include <linux/slab.h>
 #include <linux/sched.h>
 #include <net/mac80211.h>
 #include <asm/unaligned.h>
+#endif
+
 #include "iwl-io.h"
 #include "dev.h"
 #include "calib.h"

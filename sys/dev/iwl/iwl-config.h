@@ -63,8 +63,14 @@
 #ifndef __IWL_CONFIG_H__
 #define __IWL_CONFIG_H__
 
+#ifdef __linux__
 #include <linux/types.h>
 #include <net/mac80211.h>
+#endif
+
+#ifdef __FreeBSD__
+#include "linux-compat-80211.h"
+#endif
 
 
 enum iwl_device_family {

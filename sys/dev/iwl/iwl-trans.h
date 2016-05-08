@@ -65,9 +65,11 @@
 #ifndef __iwl_trans_h__
 #define __iwl_trans_h__
 
+#ifdef __linux__
 #include <linux/ieee80211.h>
 #include <linux/mm.h> /* for page_address */
 #include <linux/lockdep.h>
+#endif
 
 #include "iwl-debug.h"
 #include "iwl-config.h"
