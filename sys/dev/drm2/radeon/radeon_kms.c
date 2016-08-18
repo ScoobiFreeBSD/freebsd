@@ -460,13 +460,17 @@ int radeon_driver_open_kms(struct drm_device *dev, struct drm_file *file_priv)
 		 * virtual address space */
 		bo_va = radeon_vm_bo_add(rdev, &fpriv->vm,
 					 rdev->ring_tmp_bo.bo);
-		r = radeon_vm_bo_set_addr(rdev, bo_va, RADEON_VA_IB_OFFSET,
-					  RADEON_VM_PAGE_READABLE |
-					  RADEON_VM_PAGE_SNOOPED);
-		if (r) {
-			radeon_vm_fini(rdev, &fpriv->vm);
-			free(fpriv, DRM_MEM_DRIVER);
-			return r;
+		if (bo_va) {
+			r = radeon_vm_bo_set_addr(rdev, bo_va, RADEON_VA_IB_OFFSET,
+						  RADEON_VM_PAGE_READABLE |
+						  RADEON_VM_PAGE_SNOOPED);
+			if (r) {
+				radeon_vm_fini(rdev, &fpriv->vm);
+				free(fpriv, DRM_MEM_DRIVER);
+				return r;
+			}
+		} else {
+			return -ENOMEM;
 		}
 
 		file_priv->driver_priv = fpriv;
