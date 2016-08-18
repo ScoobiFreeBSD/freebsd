@@ -148,10 +148,16 @@ struct iwl_cfg;
  * @exit_d0i3: configure the fw to exit d0i3. May sleep.
  */
 struct iwl_op_mode_ops {
+#ifdef __linux__
 	struct iwl_op_mode *(*start)(struct iwl_trans *trans,
 				     const struct iwl_cfg *cfg,
 				     const struct iwl_fw *fw,
 				     struct dentry *dbgfs_dir);
+#else
+	struct iwl_op_mode *(*start)(struct iwl_trans *trans,
+				     const struct iwl_cfg *cfg,
+				     const struct iwl_fw *fw);
+#endif
 	void (*stop)(struct iwl_op_mode *op_mode);
 	void (*rx)(struct iwl_op_mode *op_mode, struct napi_struct *napi,
 		   struct iwl_rx_cmd_buffer *rxb);

@@ -5,10 +5,13 @@
 
 #include "linux-compat-80211.h"
 
+#define WARN_ON(x) (x)
+
 #define BIT(x) (1 << (x))
 #define DIV_ROUND_UP(n,d) (((n) + (d) - 1) / (d))
 #define BITS_TO_LONGS(x) DIV_ROUND_UP(x, 8 * sizeof(long))
 #define __printf(a, b) __attribute__((format(printf, a, b)))
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
 #define u8  uint8_t
 #define __u8  u8
@@ -44,6 +47,23 @@
 		 (config_enabled(option##_MODULE) && config_enabled(MODULE)))
 
 #define IS_ENABLED(option) (IS_BUILTIN(option) || IS_MODULE(option))
+
+#define	NBBY	8		/* number of bits in a byte */
+#define	NB_BITS_PER_LONG		(sizeof(long) * NBBY)
+#define	__bit_word(b)			((b) / NB_BITS_PER_LONG)
+#define	__bit_mask(b)			(1UL << (b) % NB_BITS_PER_LONG)
+#define	__bit_addr(p, b)		((const volatile u_long *)(p) + __bit_word(b))
+
+#define	clear_bit(b, p) \
+    atomic_clear_long(__bit_addr(p, b), __bit_mask(b))
+#define	set_bit(b, p) \
+    atomic_set_long(__bit_addr(p, b), __bit_mask(b))
+#define	test_bit(b, p) \
+    ((*__bit_addr(p, b) & __bit_mask(b)) != 0)
+
+typedef vm_paddr_t dma_addr_t;
+
+#define ETHTOOL_FWVERS_LEN 32
 
 #ifndef __cplusplus
 

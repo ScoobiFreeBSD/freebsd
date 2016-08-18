@@ -1,7 +1,14 @@
 #ifndef __LINUX_COMPAT_80211_H__
 #define __LINUX_COMPAT_80211_H__
 
+#include <sys/param.h>
+#include <sys/kernel.h>
+#include <sys/socket.h>
+#include <net/if.h>
+#include <sys/malloc.h>
 #include <net80211/ieee80211.h>
+#include <net80211/_ieee80211.h>
+#include <net80211/ieee80211_crypto.h>
 
 enum ieee80211_smps_mode {
 	IEEE80211_SMPS_AUTOMATIC = 0x0008,	// Not supported in FreeBSD
@@ -33,5 +40,7 @@ enum nl80211_iftype {
 	NUM_NL80211_IFTYPES,
 	NL80211_IFTYPE_MAX = NUM_NL80211_IFTYPES - 1
 };
+
+#define ieee80211_cipher_scheme ieee80211_cipher
 
 #endif /* !__LINUX_COMPAT_80211_H__ */
