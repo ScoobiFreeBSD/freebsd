@@ -84,6 +84,12 @@ if [ `/sbin/sysctl -n security.jail.jailed` -eq 1 ]; then
 	fi
 fi
 
+# If boot_console is enabled from loader(8), skip all rc.d scripts that
+# are marked with KEYWORD "gui".
+if [ "$(kenv boot_console 2>/dev/null)" = "YES" ]; then
+	skip="${skip} -s gui"
+fi
+
 # If the firstboot sentinel doesn't exist, we want to skip firstboot scripts.
 if ! [ -e ${firstboot_sentinel} ]; then
 	skip_firstboot="-s firstboot"
