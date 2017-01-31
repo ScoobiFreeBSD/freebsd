@@ -590,7 +590,11 @@ GLOBAL(MipsWaitStart)			# this is 16 byte aligned
 	mtc0	t1, MIPS_COP_0_STATUS
 	bnez	v0, MipsWaitEnd
 	nop
+#if defined(CPU_XBURST) && defined(SMP)
+	nop
+#else
 	wait
+#endif
 GLOBAL(MipsWaitEnd)			# MipsWaitStart + 16
 	jr	ra
 	PTR_ADDU        sp, sp, CALLFRAME_SIZ
@@ -1015,6 +1019,8 @@ tlb_insert_random:
 	 * of this handler. Otherwise the ddb backtrace code will think that
 	 * the panic() was called from MipsTLBMissException.
 	 */
+	.globl	MipsKStackOverflow
+MipsKStackOverflow:
 	nop
 
 	.set pop

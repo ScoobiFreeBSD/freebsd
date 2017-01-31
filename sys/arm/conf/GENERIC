@@ -35,6 +35,7 @@ files		"../allwinner/a10/files.a10"
 files		"../allwinner/a13/files.a13"
 files		"../allwinner/a20/files.a20"
 files		"../allwinner/a31/files.a31"
+files		"../allwinner/a33/files.a33"
 files		"../allwinner/a83t/files.a83t"
 files		"../allwinner/h3/files.h3"
 files		"../broadcom/bcm2835/files.bcm2836"
@@ -43,16 +44,19 @@ files		"../nvidia/tegra124/files.tegra124"
 files		"../qemu/files.qemu"
 files		"../ti/files.ti"
 files		"../ti/am335x/files.am335x"
+files		"../ti/omap4/files.omap4"
 
 options 	SOC_ALLWINNER_A10
 options 	SOC_ALLWINNER_A13
 options 	SOC_ALLWINNER_A20
 options 	SOC_ALLWINNER_A31
 options 	SOC_ALLWINNER_A31S
+options 	SOC_ALLWINNER_A33
 options 	SOC_ALLWINNER_A83T
 options 	SOC_ALLWINNER_H3
 options 	SOC_BCM2836
 options		SOC_TI_AM335X
+options		SOC_OMAP4
 
 options 	SCHED_ULE		# ULE scheduler
 options 	SMP			# Enable multiple cores
@@ -80,6 +84,7 @@ device		pmu
 
 # ARM Generic Timer
 device		generic_timer
+device		mpcore_timer
 
 # MMC/SD/SDIO Card slot support
 device		sdhci			# SD controller
@@ -129,6 +134,9 @@ device		ti_i2c
 device		am335x_pmic		# AM335x Power Management IC (TPC65217)
 device		am335x_rtc		# RTC support (power management only)
 #define 	am335x_dmtpps		# Pulse Per Second capture driver
+device		twl			# TI TWLX0X0/TPS659x0 Power Management
+device		twl_vreg		# twl voltage regulation
+device		twl_clks		# twl external clocks
 
 # GPIO
 device		gpio
@@ -144,6 +152,7 @@ device		aw_cir
 
 # SPI
 device		spibus
+device		spigen
 device		bcm2835_spi
 device		ti_spi
 
@@ -214,9 +223,12 @@ device		ti_pruss
 # Mailbox support
 device		ti_mbox
 
+# DMA controller
+device		ti_sdma
+
 # Extensible Firmware Interface
 options 	EFI
 
 # Flattened Device Tree
 options 	FDT			# Configure using FDT/DTB data
-makeoptions	MODULES_EXTRA="dtb/allwinner dtb/am335x dtb/nvidia dtb/rpi"
+makeoptions	MODULES_EXTRA="dtb/allwinner dtb/am335x dtb/nvidia dtb/rpi dtb/omap4"

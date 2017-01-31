@@ -573,7 +573,7 @@ uart_bus_attach(device_t dev)
 	 * the device.
 	 */
 	sc0 = device_get_softc(dev);
-	if (sc0->sc_class->size > sizeof(*sc)) {
+	if (sc0->sc_class->size > device_get_driver(dev)->size) {
 		sc = malloc(sc0->sc_class->size, M_UART, M_WAITOK|M_ZERO);
 		bcopy(sc0, sc, sizeof(*sc));
 		device_set_softc(dev, sc);
@@ -677,7 +677,6 @@ uart_bus_attach(device_t dev)
 	 * safest thing to do.
 	 */
 	if (filt != FILTER_SCHEDULE_THREAD && !uart_force_poll) {
-		sc->sc_irid = 0;
 		sc->sc_ires = bus_alloc_resource_any(dev, SYS_RES_IRQ,
 		    &sc->sc_irid, RF_ACTIVE | RF_SHAREABLE);
 	}
@@ -781,11 +780,10 @@ uart_bus_detach(device_t dev)
 
 	mtx_destroy(&sc->sc_hwmtx_s);
 
-	if (sc->sc_class->size > sizeof(*sc)) {
+	if (sc->sc_class->size > device_get_driver(dev)->size) {
 		device_set_softc(dev, NULL);
 		free(sc, M_UART);
-	} else
-		device_set_softc(dev, NULL);
+	}
 
 	return (0);
 }

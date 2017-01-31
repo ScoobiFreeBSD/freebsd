@@ -120,6 +120,14 @@ SYSCTL_INT(_net_inet_tcp, OID_AUTO, syncookies_only, CTLFLAG_VNET | CTLFLAG_RW,
     &VNET_NAME(tcp_syncookiesonly), 0,
     "Use only TCP SYN cookies");
 
+static VNET_DEFINE(int, functions_inherit_listen_socket_stack) = 1;
+#define V_functions_inherit_listen_socket_stack \
+    VNET(functions_inherit_listen_socket_stack)
+SYSCTL_INT(_net_inet_tcp, OID_AUTO, functions_inherit_listen_socket_stack,
+    CTLFLAG_VNET | CTLFLAG_RW,
+    &VNET_NAME(functions_inherit_listen_socket_stack), 0,
+    "Inherit listen socket's stack");
+
 #ifdef TCP_OFFLOAD
 #define ADDED_BY_TOE(sc) ((sc)->sc_tod != NULL)
 #endif
@@ -830,7 +838,7 @@ syncache_socket(struct syncache *sc, struct socket *lso, struct mbuf *m)
 	tcp_rcvseqinit(tp);
 	tcp_sendseqinit(tp);
 	blk = sototcpcb(lso)->t_fb;
-	if (blk != tp->t_fb) {
+	if (V_functions_inherit_listen_socket_stack && blk != tp->t_fb) {
 		/*
 		 * Our parents t_fb was not the default,
 		 * we need to release our ref on tp->t_fb and 
@@ -1069,10 +1077,17 @@ syncache_expand(struct in_conninfo *inc, struct tcpopt *to, struct tcphdr *th,
 	}
 
 	/*
-	 * If timestamps were negotiated the reflected timestamp
-	 * must be equal to what we actually sent in the SYN|ACK.
+	 * If timestamps were negotiated, the reflected timestamp
+	 * must be equal to what we actually sent in the SYN|ACK
+	 * except in the case of 0. Some boxes are known for sending
+	 * broken timestamp replies during the 3whs (and potentially
+	 * during the connection also).
+	 *
+	 * Accept the final ACK of 3whs with reflected timestamp of 0
+	 * instead of sending a RST and deleting the syncache entry.
 	 */
-	if ((to->to_flags & TOF_TS) && to->to_tsecr != sc->sc_ts) {
+	if ((to->to_flags & TOF_TS) && to->to_tsecr &&
+	    to->to_tsecr != sc->sc_ts) {
 		if ((s = tcp_log_addrs(inc, th, NULL, NULL)))
 			log(LOG_DEBUG, "%s; %s: TSECR %u != TS %u, "
 			    "segment rejected\n",
@@ -1163,7 +1178,7 @@ syncache_add(struct in_conninfo *inc, struct tcpopt *to, struct tcphdr *th,
 	struct syncache_head *sch;
 	struct mbuf *ipopts = NULL;
 	u_int ltflags;
-	int win, sb_hiwat, ip_ttl, ip_tos;
+	int win, ip_ttl, ip_tos;
 	char *s;
 	int rv = 0;
 #ifdef INET6
@@ -1201,7 +1216,6 @@ syncache_add(struct in_conninfo *inc, struct tcpopt *to, struct tcphdr *th,
 	ip_ttl = inp->inp_ip_ttl;
 	ip_tos = inp->inp_ip_tos;
 	win = sbspace(&so->so_rcv);
-	sb_hiwat = so->so_rcv.sb_hiwat;
 	ltflags = (tp->t_flags & (TF_NOOPT | TF_SIGNATURE));
 
 #ifdef TCP_RFC7413

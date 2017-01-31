@@ -52,7 +52,6 @@ struct ogetdirentries_args;
 struct rlimit;
 struct rusage;
 union semun;
-struct sendfile_args;
 struct sockaddr;
 struct stat;
 struct thr_param;
@@ -109,7 +108,7 @@ int	kern_futimens(struct thread *td, int fd, struct timespec *tptr,
 int	kern_getdirentries(struct thread *td, int fd, char *buf, u_int count,
 	    long *basep, ssize_t *residp, enum uio_seg bufseg);
 int	kern_getfsstat(struct thread *td, struct statfs **buf, size_t bufsize,
-	    size_t *countp, enum uio_seg bufseg, int flags);
+	    size_t *countp, enum uio_seg bufseg, int mode);
 int	kern_getitimer(struct thread *, u_int, struct itimerval *);
 int	kern_getppid(struct thread *);
 int	kern_getpeername(struct thread *td, int fd, struct sockaddr **sa,
@@ -197,8 +196,6 @@ int	kern_semctl(struct thread *td, int semid, int semnum, int cmd,
 	    union semun *arg, register_t *rval);
 int	kern_select(struct thread *td, int nd, fd_set *fd_in, fd_set *fd_ou,
 	    fd_set *fd_ex, struct timeval *tvp, int abi_nfdbits);
-int	kern_sendfile(struct thread *td, struct sendfile_args *uap,
-	    struct uio *hdr_uio, struct uio *trl_uio, int compat);
 int	kern_sendit(struct thread *td, int s, struct msghdr *mp, int flags,
 	    struct mbuf *control, enum uio_seg segflg);
 int	kern_setgroups(struct thread *td, u_int ngrp, gid_t *groups);
