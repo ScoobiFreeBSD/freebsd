@@ -8,7 +8,7 @@ IMGS=	${IMG}
 .endif
 .for IMG in ${IMGS}
 CLEANFILES+=	${IMG}.fw
-FIRMWS+=	${IMG}.fw:${KMOD}:${IMG:C/.*-//}
+FIRMWS+=	${IMG}.fw:${IMG}:${IMG:C/.*-//}
 
 #
 # Note that a license ack is not needed for iwn.

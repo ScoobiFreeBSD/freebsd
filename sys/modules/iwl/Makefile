@@ -5,6 +5,8 @@
 KMOD=	if_iwl
 
 # Main driver
+SRCS+=	device_if.h bus_if.h pci_if.h opt_inet.h opt_wlan.h
+SRCS+=	iwl-pci.o
 SRCS+=	iwl-io.o iwl-io.o iwl-drv.o iwl-debug.o iwl-notif-wait.o
 SRCS+=	iwl-eeprom-read.o iwl-eeprom-parse.o iwl-phy-db.o iwl-nvm-parse.o
 SRCS+=	iwl-1000.o iwl-2000.o iwl-5000.o iwl-6000.o

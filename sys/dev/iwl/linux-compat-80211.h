@@ -41,6 +41,9 @@ enum nl80211_iftype {
 	NL80211_IFTYPE_MAX = NUM_NL80211_IFTYPES - 1
 };
 
+struct napi_struct {
+};
+
 #define ieee80211_cipher_scheme ieee80211_cipher
 
 #endif /* !__LINUX_COMPAT_80211_H__ */

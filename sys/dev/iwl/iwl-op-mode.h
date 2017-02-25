@@ -72,6 +72,10 @@
 #include <linux/debugfs.h>
 #endif
 
+#ifdef __FreeBSD__
+#include "linux-compat-80211.h"
+#endif
+
 struct iwl_op_mode;
 struct iwl_trans;
 struct sk_buff;
