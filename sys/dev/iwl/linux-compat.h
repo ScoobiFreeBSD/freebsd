@@ -75,6 +75,11 @@ typedef vm_paddr_t dma_addr_t;
 typedef	int	_Bool;
 #endif
 
+#define might_sleep() do { } while(0)
+#define __must_check __attribute__((warn_unused_result))
+#define __free_pages(page, page_order) do { } while(0)
+#define free_pages(page, page_order) __free_pages(page, page_order)
+
 #endif /* !__cplusplus */
 
 #endif /* !__LINUX_COMPAT_H__ */
