@@ -48,6 +48,8 @@
 
 #define IS_ENABLED(option) (IS_BUILTIN(option) || IS_MODULE(option))
 
+#define MODULE_FIRMWARE(x)
+
 #define	NBBY	8		/* number of bits in a byte */
 #define	NB_BITS_PER_LONG		(sizeof(long) * NBBY)
 #define	__bit_word(b)			((b) / NB_BITS_PER_LONG)

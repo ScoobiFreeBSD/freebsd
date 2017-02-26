@@ -46,4 +46,32 @@ struct napi_struct {
 
 #define ieee80211_cipher_scheme ieee80211_cipher
 
+enum ieee80211_band {
+	IEEE80211_BAND_2GHZ,
+	IEEE80211_BAND_5GHZ,
+	IEEE80211_BAND_60GHZ,
+};
+
+/*
+ * Maximum length of AMPDU that the STA can receive.
+ * Length = 2 ^ (13 + max_ampdu_length_exp) - 1 (octets)
+ */
+enum ieee80211_max_ampdu_length_exp {
+	IEEE80211_HT_MAX_AMPDU_8K = 0,
+	IEEE80211_HT_MAX_AMPDU_16K = 1,
+	IEEE80211_HT_MAX_AMPDU_32K = 2,
+	IEEE80211_HT_MAX_AMPDU_64K = 3,
+	IEEE80211_VHT_MAX_AMPDU_8K =  IEEE80211_HT_MAX_AMPDU_8K,
+	IEEE80211_VHT_MAX_AMPDU_16K = IEEE80211_HT_MAX_AMPDU_16K,
+	IEEE80211_VHT_MAX_AMPDU_32K = IEEE80211_HT_MAX_AMPDU_32K,
+	IEEE80211_VHT_MAX_AMPDU_64K = IEEE80211_HT_MAX_AMPDU_64K
+};
+
+#define ieee80211_hdr ieee80211_frame
+
+#include <net/ethernet.h>
+
+#define ETH_ALEN ETHER_ADDR_LEN
+#define NETIF_F_RXCSUM IFCAP_RXCSUM
+
 #endif /* !__LINUX_COMPAT_80211_H__ */
