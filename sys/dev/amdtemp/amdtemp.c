@@ -1077,7 +1077,7 @@ amdtemp_sysctl_reg_add(struct amdtemp_softc *sc,
 	uint32_t i;
 
 	for (i = 0; regs[i].oid_handler; i ++) {
-		sysctl_add_oid(ctx, child, OID_AUTO, regs[i].name,
+		SYSCTL_ADD_OID(ctx, child, OID_AUTO, regs[i].name,
 		    regs[i].flags, sc,
 		    MAKE_ARG2(regs[i].reg, regs[i].a1, regs[i].a2),
 		    regs[i].oid_handler, regs[i].fmt, regs[i].descr);
@@ -1093,7 +1093,7 @@ amdtemp_sysctl_reg_add2(struct amdtemp_softc *sc,
 	uint32_t i;
 
 	for (i = 0; regs[i].oid_handler; i ++) {
-		sysctl_add_oid(ctx, child, OID_AUTO, regs[i].name,
+		SYSCTL_ADD_OID(ctx, child, OID_AUTO, regs[i].name,
 		    regs[i].flags, sc,
 		    MAKE_ARG2(regs[i].reg, regs[i].a1, a2),
 		    regs[i].oid_handler, regs[i].fmt, regs[i].descr);
