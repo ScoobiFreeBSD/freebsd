@@ -1012,17 +1012,43 @@ out:
 	return (0);
 }
 
+static UINT32 vo_brightness_level = 0;
+
+static int
+vo_get_bqc(ACPI_HANDLE handle, UINT32 *level)
+{
+	static int has_bqc = -1;
+	int retval = 0;
+
+	switch (has_bqc) {
+		case 1:
+			retval = ACPI_FAILURE(acpi_GetInteger(handle,
+						"_BQC", &vo_brightness_level));
+			break;
+		case -1:
+			has_bqc = ACPI_SUCCESS(acpi_GetInteger(handle,
+							"_BQC", &vo_brightness_level));
+			break;
+		case 0:
+		default:
+			break;
+	}
+	if (retval == 0 && level != NULL) {
+		*level = vo_brightness_level;
+	}
+	return retval;
+}
+
 static int
 vo_get_brightness(ACPI_HANDLE handle)
 {
 	UINT32 level;
-	ACPI_STATUS status;
+	/*ACPI_STATUS status;*/
 
 	ACPI_SERIAL_ASSERT(video_output);
-	status = acpi_GetInteger(handle, "_BQC", &level);
-	if (ACPI_FAILURE(status)) {
+	if (vo_get_bqc(handle, &level) != 0) {
 		printf("can't evaluate %s._BQC - %s\n", acpi_name(handle),
-		    AcpiFormatException(status));
+		    /*AcpiFormatException(status)*/"");
 		return (-1);
 	}
 	if (level > 100)
@@ -1037,6 +1063,7 @@ vo_set_brightness(ACPI_HANDLE handle, int level)
 	ACPI_STATUS status;
 
 	ACPI_SERIAL_ASSERT(video_output);
+	vo_brightness_level = level;
 	status = acpi_SetInteger(handle, "_BCM", level);
 	if (ACPI_FAILURE(status))
 		printf("can't evaluate %s._BCM - %s\n",
