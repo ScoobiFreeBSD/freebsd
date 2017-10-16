@@ -43,6 +43,17 @@ __FBSDID("$FreeBSD$");
 #include <dev/pci/pcireg.h>
 #include <dev/pci/pcivar.h>
 
+#define LPSS_PRIV_OFFSET	0x200
+#define LPSS_PRIV_SIZE		0x100
+#define LPSS_PRIV_CAPS		0xfc
+#define LPSS_PRIV_CAPS_TYPE_SHIFT	4
+#define LPSS_PRIV_CAPS_TYPE_MASK	(0xf << LPSS_PRIV_CAPS_TYPE_SHIFT)
+
+#define LPSS_PRIV_READ_4(sc, offset) \
+	bus_read_4((sc), LPSS_PRIV_OFFSET + (offset))
+#define LPSS_PRIV_WRITE_4(sc, offset, value) \
+	bus_write_4((sc), LPSS_PRIV_OFFSET + (offset), (value))
+
 struct lpss_softc {
 	device_t		sc_dev;
 	int			sc_mem_rid;
@@ -51,6 +62,12 @@ struct lpss_softc {
 	struct resource		*sc_irq_res;
 	void			*sc_irq_ih;
 	unsigned long 		sc_clock_rate;
+	uint32_t		sc_caps;
+	int			sc_type;	// LPSS_PRIV_TYPE_*
+#define LPSS_PRIV_TYPE_I2C	0
+#define LPSS_PRIV_TYPE_UART	1
+#define LPSS_PRIV_TYPE_SPI	2
+#define LPSS_PRIV_TYPE_MAX	LPSS_PRIV_TYPE_SPI
 };
 
 static const struct {
@@ -76,7 +93,7 @@ lpss_pci_probe(device_t dev)
 			sc = device_get_softc(dev);
 			sc->sc_clock_rate = lpss_pci_ids[i].clock_rate;
 			device_set_desc(dev, "Intel LPSS PCI Driver");
-			return (BUS_PROBE_DEFAULT);
+			return BUS_PROBE_DEFAULT;
 		}
 	}
 	return ENXIO;
@@ -104,6 +121,12 @@ lpss_pci_attach(device_t dev)
 		device_printf(dev, "can't allocate IRQ resource\n");
 		goto error;
 	}
+	sc->sc_caps = LPSS_PRIV_READ_4(sc->sc_mem_res, LPSS_PRIV_CAPS);
+	sc->sc_type = (sc->sc_caps & LPSS_PRIV_CAPS_TYPE_MASK) >> LPSS_PRIV_CAPS_TYPE_SHIFT;
+	if (sc->sc_type > LPSS_PRIV_TYPE_MAX) {
+		device_printf(dev, "No supported MFP device found.\n");
+		goto error;
+	}
 
 	return (bus_generic_attach(dev));
 
@@ -117,7 +140,6 @@ error:
 		    sc->sc_irq_rid, sc->sc_irq_res);
 
 	return (ENXIO);
-	return (0);
 }
 
 static int
