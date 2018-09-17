@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2017 Anthony Jenkins <Scoobi_doo@yahoo.com>
+ * Copyright (c) 2018 Anthony Jenkins <Scoobi_doo@yahoo.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,16 +43,27 @@ __FBSDID("$FreeBSD$");
 #include <dev/pci/pcireg.h>
 #include <dev/pci/pcivar.h>
 
+#define BIT(nr)		(1UL << (nr))
+
 #define LPSS_PRIV_OFFSET	0x200
 #define LPSS_PRIV_SIZE		0x100
 #define LPSS_PRIV_CAPS		0xfc
 #define LPSS_PRIV_CAPS_TYPE_SHIFT	4
 #define LPSS_PRIV_CAPS_TYPE_MASK	(0xf << LPSS_PRIV_CAPS_TYPE_SHIFT)
+#define LPSS_PRIV_CAPS_NO_IDMA		BIT(8)
+#define LPSS_PRIV_REMAP_ADDR		0x40
+#define LPSS_PRIV_RESETS		0x04
+#define LPSS_PRIV_RESETS_FUNC		BIT(2)
+#define LPSS_PRIV_RESETS_IDMA		0x3
+#define LPSS_PRIV_SSP_REG		0x20
+#define LPSS_PRIV_SSP_REG_DIS_DMA_FIN	BIT(0)
 
 #define LPSS_PRIV_READ_4(sc, offset) \
 	bus_read_4((sc), LPSS_PRIV_OFFSET + (offset))
 #define LPSS_PRIV_WRITE_4(sc, offset, value) \
 	bus_write_4((sc), LPSS_PRIV_OFFSET + (offset), (value))
+#define LPSS_PRIV_WRITE_8(sc, offset, value) \
+	bus_write_8((sc), LPSS_PRIV_OFFSET + (offset), (value))
 
 struct lpss_softc {
 	device_t		sc_dev;
@@ -76,6 +87,7 @@ static const struct {
 	unsigned long clock_rate;
 } lpss_pci_ids[] = {
 	{ 0x8086, 0x9d61, 120000000 },
+	{ 0x8086, 0xa160, 120000000 },
 	{      0,      0,         0 }
 };
 
@@ -90,13 +102,50 @@ lpss_pci_probe(device_t dev)
 		{
 			struct lpss_softc *sc;
 
+			device_printf(dev, "Found PCI device 0x%04x:0x%04x\n",
+					lpss_pci_ids[i].vendor,
+					lpss_pci_ids[i].device);
 			sc = device_get_softc(dev);
 			sc->sc_clock_rate = lpss_pci_ids[i].clock_rate;
 			device_set_desc(dev, "Intel LPSS PCI Driver");
-			return BUS_PROBE_DEFAULT;
+			return (BUS_PROBE_DEFAULT);
 		}
 	}
 	return ENXIO;
+}
+
+static bool intel_lpss_has_idma(const struct lpss_softc *sc)
+{
+	return (sc->sc_caps & LPSS_PRIV_CAPS_NO_IDMA) == 0;
+}
+
+static void intel_lpss_set_remap_addr(const struct lpss_softc *sc)
+{
+	LPSS_PRIV_WRITE_8(sc->sc_mem_res, LPSS_PRIV_REMAP_ADDR, (uintptr_t)sc->sc_mem_res);
+}
+
+static void intel_lpss_deassert_reset(const struct lpss_softc *sc)
+{
+	uint32_t value = LPSS_PRIV_RESETS_FUNC | LPSS_PRIV_RESETS_IDMA;
+
+	/* Bring out the device from reset */
+	LPSS_PRIV_WRITE_4(sc->sc_mem_res, LPSS_PRIV_RESETS, value);
+}
+
+static void lpss_init_dev(const struct lpss_softc *sc)
+{
+	uint32_t value = LPSS_PRIV_SSP_REG_DIS_DMA_FIN;
+
+	intel_lpss_deassert_reset(sc);
+
+	if (!intel_lpss_has_idma(sc))
+		return;
+
+	intel_lpss_set_remap_addr(sc);
+
+	/* Make sure that SPI multiblock DMA transfers are re-enabled */
+	if (sc->sc_type == LPSS_PRIV_TYPE_SPI)
+		LPSS_PRIV_WRITE_4(sc->sc_mem_res, LPSS_PRIV_SSP_REG, value);
 }
 
 static int
@@ -106,27 +155,40 @@ lpss_pci_attach(device_t dev)
 
 	sc = device_get_softc(dev);
 
-	sc->sc_mem_rid = 0;
+	if (!sc) {
+		device_printf(dev, "Error getting softc from device.");
+		goto error;
+	}
+	sc->sc_dev = dev;
+	sc->sc_mem_rid = 0x10;
 	sc->sc_mem_res = bus_alloc_resource_any(sc->sc_dev,
 	    SYS_RES_MEMORY, &sc->sc_mem_rid, RF_ACTIVE);
 	if (sc->sc_mem_res == NULL) {
-		device_printf(dev, "can't allocate memory resource\n");
+		device_printf(dev, "Can't allocate memory resource\n");
 		goto error;
 	}
 
-	sc->sc_irq_rid = 0;
-	sc->sc_irq_res = bus_alloc_resource_any(sc->sc_dev,
-	    SYS_RES_IRQ, &sc->sc_irq_rid, RF_ACTIVE);
-	if (sc->sc_irq_res == NULL) {
-		device_printf(dev, "can't allocate IRQ resource\n");
-		goto error;
-	}
+// 	sc->sc_irq_rid = 0x10;
+// 	sc->sc_irq_res = bus_alloc_resource_any(sc->sc_dev,
+// 	    SYS_RES_IRQ, &sc->sc_irq_rid, RF_ACTIVE);
+// 	if (sc->sc_irq_res == NULL) {
+// 		device_printf(dev, "Can't allocate IRQ resource\n");
+// 		goto error;
+// 	}
+// 	device_printf(dev, "IRQ: %d\n", sc->sc_caps);
 	sc->sc_caps = LPSS_PRIV_READ_4(sc->sc_mem_res, LPSS_PRIV_CAPS);
+	device_printf(dev, "Capabilities: 0x%08x\n", sc->sc_caps);
 	sc->sc_type = (sc->sc_caps & LPSS_PRIV_CAPS_TYPE_MASK) >> LPSS_PRIV_CAPS_TYPE_SHIFT;
 	if (sc->sc_type > LPSS_PRIV_TYPE_MAX) {
-		device_printf(dev, "No supported MFP device found.\n");
+		device_printf(dev, "No supported MFP device found (sc_type=0x%04x).\n", sc->sc_type);
 		goto error;
 	}
+	device_printf(dev, "MFP device type: %s\n",
+			sc->sc_type == LPSS_PRIV_TYPE_I2C ? "I2C" :
+			sc->sc_type == LPSS_PRIV_TYPE_UART ? "UART" :
+			sc->sc_type == LPSS_PRIV_TYPE_SPI ? "SPI" : "Unknown");
+
+	lpss_init_dev(sc);
 
 	return (bus_generic_attach(dev));
 
@@ -135,9 +197,10 @@ error:
 		bus_release_resource(dev, SYS_RES_MEMORY,
 		    sc->sc_mem_rid, sc->sc_mem_res);
 
-	if (sc->sc_irq_res != NULL)
-		bus_release_resource(dev, SYS_RES_MEMORY,
+	if (sc->sc_irq_res != NULL) {
+		bus_release_resource(dev, SYS_RES_IRQ,
 		    sc->sc_irq_rid, sc->sc_irq_res);
+	}
 
 	return (ENXIO);
 }
@@ -145,6 +208,13 @@ error:
 static int
 lpss_pci_detach(device_t dev)
 {
+	struct lpss_softc *sc;
+
+	sc = device_get_softc(dev);
+
+	if (sc->sc_mem_res != NULL)
+		bus_release_resource(dev, SYS_RES_MEMORY,
+		    sc->sc_mem_rid, sc->sc_mem_res);
 	return (0);
 }
 
@@ -193,7 +263,7 @@ static device_method_t lpss_pci_methods[] = {
 static driver_t lpss_pci_driver = {
 	"lpss",
 	lpss_pci_methods,
-	sizeof(struct lpss_softc),
+	sizeof(struct lpss_softc)
 };
 
 static devclass_t lpss_devclass;
